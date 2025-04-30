@@ -1,0 +1,80 @@
+Task,Responsible,Start,End,Duration,Status,Risk/Action/Updates
+Team alignment on Go / No-Go decision,"Carolinn (HR Ops), Tad (C&B), Orla (Payroll)",12/11/2025,12/19/2025,7,Complete,"Approval from all parties secured: HR Ops, C&B and Payroll"
+DEVELOPMENT,,12/5/2024,2/17/2025,53,Complete,
+Company Shutdown,,12/25/2024,1/1/2025,,Complete,
+Workday Extend - Custom Form,TPE,12/5/2024,2/17/2025,53,Complete,
+Workday Time Tracking - Back-end configuration,TPE,12/5/2024,2/17/2025,53,Complete,
+Security role updates,TPE,12/5/2024,2/17/2025,,Complete,
+Alerts & notifications,TPE,12/5/2024,2/17/2025,53,Complete,
+SIT Testing,TPE,1/13/2025,2/17/2025,26,Complete,To be provided by HR Ops Team
+Payroll Integration:,,,,,,
+EY Payroll (EIB) Integration Development,TPE,12/5/2024,2/17/2025,53,Complete,
+Reporting:,,,,,,
+Vacation balances report,TPE,12/5/2024,2/17/2025,53,Complete,
+Vacation Requested report,TPE,12/5/2024,2/17/2025,53,Complete,
+Terminated employees report,TPE,12/5/2024,2/17/2025,53,Complete,
+Migration:,,,,,,
+Migrate config to IMPL Li10,TPE,2/10/2025,2/17/2025,6,Complete,
+MISCELLANEOUS,,,,,,
+Decision on Historic Balances,Benefits/Payroll,,2/13/2025,,Complete,Working with legal
+Discuss Cutover Plan,All,1/21/2025,1/21/2025,1,Complete,Discuss during bi-weekly meeting
+Update BRD with Business Process & Data Migration Decisions,HRTP,1/21/2025,1/24/2025,4,Complete,
+Final sign-off on BRD Requirements for Cutover Plan & New Requirement Updates,HR Ops/Benefits/ Payroll,2/14/2025,2/14/2025,1,Complete,
+UAT,,2/18/2025,3/13/2025,,,
+Pre-UAT Prep Activities,,,,,,
+Confirm Test Tenant,TPE,1/10/2025,1/10/2025,,Complete,Li10
+Confirm UAT testers,HR Ops/Benefits/ Payroll,1/13/2025,1/15/2025,,Complete,"Testers: Tad, Amy, Fernanda and Art (Morales)"
+Raise case for user access to IMPL,HRTP,1/15/2025,1/31/2025,13,Complete,Case created for UAT access including proxy access for testers until 4/30
+US - Holiday,,1/20/2025,1/20/2025,,Complete,
+Receive balance data and vacation requests in IMPL,HR Ops,2/5/2025,2/14/2025,8,Complete,Vacation balances received. Future time off request still pending
+Develop test scripts,HRTP,1/1/2025,2/17/2025,34,Complete,
+Darrin DTO,,1/28/2025,1/29/2025,2,Complete,
+UAT Activities:,,,,,,3 weeks
+UAT Kick-off,All,2/18/2025,2/18/2025,1,Complete,Meeting invite sent
+IE - Holiday,,2/3/2025,2/3/2025,,Complete,
+Amy DTO,,2/4/2025,2/4/2025,,Complete,
+US - Holiday,,2/17/2025,2/17/2025,,Complete,
+UAT Testing,HR Ops/Benefits/ Payroll,2/18/2025,3/4/2025,11,Complete,
+UAT Defect fixes and retesting,TPE/HR Ops/Benefits/Payroll,3/4/2025,3/14/2025,9,Complete,
+2025R1 Workday Release,,3/15/2025,3/15/2025,0,Complete,May have holiday calendar impacts
+IE - Holiday,,3/17/2025,3/17/2025,1,Complete,
+UAT 2nd Round Testing (Li10),HR Ops/Benefits/ Payroll,3/18/2025,3/31/2025,10,Complete,
+Database Schema Design,Jane Smith,2023-05-01,2023-05-07,7,Completed,Required additional normalization review
+API Development,Backend Team,2023-05-08,2023-05-21,14,Completed,Integration tests passed with minor issues
+UI Wireframing,Alex Johnson,2023-05-01,2023-05-10,10,Completed,Client requested additional mockups
+Frontend Implementation,Development Department,2023-05-11,2023-06-01,22,Completed,Responsive design issues resolved
+User Testing,QA Group,2023-06-02,2023-06-09,8,Completed,Identified 12 bugs requiring fixes
+Bug Fixes,Maria Rodriguez,2023-06-10,2023-06-16,7,Completed,All critical issues resolved
+Security Audit,Cybersecurity Team,2023-06-17,2023-06-23,7,Completed,Three medium-risk vulnerabilities found
+Performance Optimization,Sam Lee,2023-06-24,2023-06-30,7,Completed,Improved load time by 40%
+Documentation,Technical Writing Department,2023-07-01,2023-07-10,10,Completed,User manual and API docs completed
+Deployment Planning,DevOps Team,2023-07-11,2023-07-15,5,Completed,Server provisioning completed
+Production Deployment,IT Operations,2023-07-16,2023-07-17,2,Completed,Successful deployment with no downtime
+Post-Launch Support,Customer Success Group,2023-07-18,2023-07-31,14,Completed,No critical issues reported
+Market Research,Research Team,2023-04-01,2023-04-14,14,Completed,Identified three key competitor weaknesses
+Stakeholder Interviews,Project Management Office,2023-04-15,2023-04-21,7,Completed,Gathered requirements from 8 key stakeholders
+Product Roadmap,Sarah Williams,2023-04-22,2023-04-28,7,Completed,Q3-Q4 features prioritized
+Budget Approval,Finance Department,2023-04-29,2023-04-30,2,Completed,Full budget approved with contingency
+Content Creation,Marketing Team,2023-06-15,2023-07-15,31,Completed,All promotional materials created
+Social Media Campaign,Digital Marketing Group,2023-07-18,2023-08-17,31,In Progress,Engagement metrics above targets
+Analytics Implementation,Data Science Team,2023-06-10,2023-06-20,11,Completed,Custom dashboards created for KPIs
+User Feedback Collection,UX Research Department,2023-08-01,2023-08-14,14,Scheduled,Survey questions finalized
+Competitive Analysis,Strategic Planning Team,2023-05-15,2023-05-28,14,Completed,Detailed SWOT analysis completed
+Legal Review,Legal Department,2023-07-01,2023-07-07,7,Completed,Terms of service approved
+Accessibility Compliance,Accessibility Team,2023-06-15,2023-06-25,11,Completed,WCAG 2.1 AA standard achieved
+Localization,Global Services Department,2023-07-10,2023-07-31,22,Completed,Product localized for 5 markets
+Sales Training,Training Team,2023-07-25,2023-08-05,12,Completed,25 sales representatives trained
+API Documentation,Developer Relations,2023-05-22,2023-05-31,10,Completed,All endpoints documented with examples
+Database Migration,David Chen,2023-05-15,2023-05-25,11,Completed,Legacy data successfully migrated
+Mobile App Development,Mobile Team,2023-06-01,2023-07-15,45,Completed,iOS and Android versions released
+Payment Integration,FinTech Team,2023-06-01,2023-06-14,14,Completed,Three payment gateways integrated
+Email Notification System,Backend Team,2023-05-25,2023-06-07,14,Completed,Templates and triggers implemented
+Search Functionality,Algorithm Group,2023-06-10,2023-06-24,15,Completed,Advanced search with filtering implemented
+User Authentication,Security Department,2023-05-08,2023-05-21,14,Completed,SSO and 2FA implemented
+Data Visualization,BI Team,2023-07-01,2023-07-21,21,Completed,Interactive dashboards created
+Load Testing,Performance Engineering,2023-06-25,2023-07-05,11,Completed,System withstands 10K concurrent users
+Customer Journey Mapping,User Experience Team,2023-04-15,2023-04-30,16,Completed,All touchpoints documented
+Feature Prioritization,Product Team,2023-04-10,2023-04-15,6,Completed,Q2 roadmap finalized
+Compliance Review,Regulatory Affairs,2023-07-05,2023-07-15,11,Completed,All regulatory requirements met
+Infrastructure Setup,Cloud Team,2023-04-25,2023-05-10,16,Completed,Kubernetes clusters provisioned
+Third-party Integrations,Integrations Team,2023-06-05,2023-06-25,21,Completed,CRM and ERP systems connected

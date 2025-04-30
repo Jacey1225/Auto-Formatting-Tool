@@ -1,0 +1,14 @@
+pandas
+numpy
+gspread
+flask
+scikit-learn
+pytest
+requests
+tensorflow
+keras
+requests-oauthlib
+Flask-Mail
+matplotlib
+python-dotenv
+pdfplumber
