@@ -3,6 +3,9 @@ from transformers import BertTokenizer, BertModel
 import torch  
 import pandas as pd
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Node:
     def __init__(self, state, parent, action, path_score):
@@ -19,7 +22,6 @@ class Frontier:
         self.rules = {
             "NP": [
                 ["DET", "NOUN"],
-                ["DET", "NOUN", "NOUN"],
                 ["DET", "ADJ", "NOUN"],
                 ["DET", "ADJ", "ADJ", "NOUN"],
                 ["ADJ", "NOUN"],
@@ -46,15 +48,15 @@ class Frontier:
                 ["VERB", "ADP", "DET", "NOUN"],
                 ["VERB", "ADV"],
                 ["PRON", "VERB", "PRON", "NOUN"],
-                ["PROPN", "VERB", "PROPN", "DET", "NOUN"],
-                ["PROPN", "VERB"],
-                ["PROPN", "VERB", "NOUN"],
+                ["PRON", "VERB", "PROPN", "DET", "NOUN"],
+                ["PRON", "VERB"],
+                ["PRON", "VERB", "NOUN"],
                 ["VERB", "DET", "NOUN"],
             ]
         }
     
     def invalid(self, max_vision):
-        if len(self.frontier) < max_vision or not self.frontier:
+        if len(self.frontier) < 1 or not self.frontier:
             return True
         return False
 
@@ -80,39 +82,20 @@ class Frontier:
             phrase_type (str): the type of phrase we are searching for (either NP or VP)
 
         Returns:
-            list: a list of the nodes in sequence as to how they match to the phrase type
+            bool: True if there is a valid pattern for the given node, False otherwise
         """
         if not node.state or len(node.state) == 0:
-            return []
+            return False
 
-        if not isinstance(node.state[0], tuple) or len(node.state[0]) < 2:
-            return []
+        if not isinstance(node.state[0], tuple):
+            return False
         
-        first_tag = node.state[0][1]
-        first_text = node.state[0][0]
-        children = self.get_nodes(node)
-
-        matches = []
-
-    
+        tag_sequence = [token[1] for token in node.state]
         for rule in self.rules[phrase_type]:
-            sequence = []
-            isValid = True
-            if first_tag == rule[0]:
-                i = 1
-                sequence.append(first_text)
-                while isValid and i < len(children) and i < len(rule):
-                    if children[i][1] == rule[i]:
-                        sequence.append(children[i][0])
-                        i += 1
-                    else:
-                        isValid = False
-                        break
-                if isValid:
-                    matches.append(sequence)
-            else:
-                continue
-        return matches
+            for i in range(len(tag_sequence) - len(rule) + 1):
+                if tag_sequence[i:i+len(rule)] == rule:
+                    return True
+        return False
     
     def prune(self, beam_width):
         self.frontier.sort(key=lambda node: node.path_score, reverse=True)
@@ -124,14 +107,14 @@ class Frontier:
 #############################
 
 class EmbedTrainingData:
-    def __init__(self, filename):
+    def __init__(self):
         """embed all data within the training dataset --> used to perform a beam search on the nodes given within 
         within the current frontier. Remove top k candidates that do not fall in line with the training data as accurately as others
 
         Args:
             filename (str): path to training data
         """
-        self.training_data = pd.read_csv(filename)
+        self.training_data = pd.read_csv("src/auto_formatter/data/TrainData.csv")
         self.training_data = self.training_data.dropna()
         self.training_data.drop(self.training_data[self.training_data["Responsible"] == "TPE"].index)
 
@@ -154,18 +137,16 @@ class EmbedTrainingData:
                 encoded = self.tokenizer(task, is_split_into_words=False, return_tensors='pt', padding=True, truncation=True)
                 with torch.no_grad():
                     outputs = self.model(**encoded)
-                    embeddings.append(outputs.last_hidden_state[0])
+                    embeddings.append(outputs.last_hidden_state.mean(dim=1))
         if embeddings:
             return embeddings
 
-    def write_embeddings(self):
+    def write_embeddings(self, filename):
         """gathers all columns from the training data, embeds them, and creates a new csv file 
         with the processed data. This is the nsued to score the candidates and keep the top k that best
         fit the training date
 
         """
-        filename = "auto_formatter/data/embedded_training_data.csv"
-        
         embeddings = {
             "Task": None,
             "Responsible": None
@@ -175,14 +156,13 @@ class EmbedTrainingData:
         for column in columns:
             embeddings[column] = self.embed_tasks(column)
             
-        df = pd.DataFrame(embeddings, columns=columns)
-        df.to_csv(filename, index=False)
+        torch.save(embeddings, filename)
 
 #####################################################################################
-# BEAM SEARCH ALGORITHM --> REMOVE TOP k CANDIDATES FROM EACH STATE IN THE FRONTIER #
+# BEAM SEARCH ALGORITHM --> REMOVE TOP K CANDIDATES FROM EACH STATE IN THE FRONTIER #
 #####################################################################################
 class OrganizeRequest(EmbedTrainingData):
-    def __init__(self, request, max_vision, phrase_type, phrase_category, filename, beam_width=3):
+    def __init__(self, request, max_vision, phrase_type, phrase_category, beam_width=3):
         """Perform beam search on the given request -- 
         1. Tokenize request
         2. Update the frontier for each given set of nodes
@@ -198,7 +178,7 @@ class OrganizeRequest(EmbedTrainingData):
             phrase_type (str): type of phrase to be extracted (either NP or VP)
             beam_width (int, optional): Maximum number of candidates o be returned at each step. Defaults to 3.
         """
-        super().__init__(filename)
+        super().__init__()
         self.nlp = spacy.load("en_core_web_lg")
         self.request = request
         self.max_vision = max_vision
@@ -207,13 +187,11 @@ class OrganizeRequest(EmbedTrainingData):
         self.frontier = Frontier()
         self.beam_width = beam_width
 
-        filename = "auto_formatter/data/embedded_training_data.csv"
+        filename = os.path.join("src", "auto_formatter", "data", "EmbeddedTrainingData.pt")
         if not os.path.exists(filename):
-            self.write_embeddings()
+            self.write_embeddings(filename)
         
-        self.trained_data = pd.read_csv(filename)
-        self.trained_data = self.trained_data.dropna()
-        self.trained_data.drop(self.trained_data[self.trained_data["Responsible"] == "TPE"].index)
+        self.trained_data = torch.load(filename)
 
 
     def score_phrase(self, phrase, phrase_category):
@@ -223,24 +201,26 @@ class OrganizeRequest(EmbedTrainingData):
         Returns:
             top_k (list): top k candidates that best fit the training data
         """
-        tokens = self.tokenizer(phrase, is_split_into_words=True, return_tensors='pt', padding=True, truncation=True)
+        phrase_text = [token[0] for token in phrase]
+        tokens = self.tokenizer(phrase_text, is_split_into_words=True, return_tensors='pt', padding=True, truncation=True)
         with torch.no_grad():
             outputs = self.model(**tokens)
-            embeddings = outputs.last_hidden_state[0]
+            embeddings = outputs.last_hidden_state.mean(dim=1)
 
         score = 0
         for element in self.trained_data[phrase_category]:
             element = element.reshape(1, -1)
-            score = torch.cosine_similarity(embeddings.reshape(1, -1), element, dim = 1)
-            score += score
+            similarity = torch.cosine_similarity(embeddings, element, dim = 1)
+            score += similarity.item()
+        
         return score / len(self.trained_data[phrase_category])
 
     
     def search_by_category(self):
         """Utilizing the previous classes (Node, Frontier, and EmbedTrainingData)
         we perform a beam search on the given request, iteratively updating the frontier 
-        for each sequence of nodes --> Hybrid: Predict the possible sequences of nodes to extract a phrase
-        and then score them via atrained dataset on a given category of phrases. 
+        for each sequence of nodes --> Hybrid: Predict is the current sequence of nodes is a valid pattern 
+        to extract a phrase,and then score them via a trained dataset on a given category of phrases. 
         Finally, return the top k candidates of each node as well as the last set of candidates remaining
 
 
@@ -249,7 +229,7 @@ class OrganizeRequest(EmbedTrainingData):
         """
         doc = self.nlp(self.request) #process request for tagging
 
-        tokens = [(token.text, token.tag_) for token in doc] #tokenize request
+        tokens = [(token.text, token.pos_) for token in doc] #tokenize request
         initial_state = tokens[:min(self.max_vision, len(tokens))] #get the first n words of the request
 
         #create the starting node with the initial state, and empty data
@@ -261,55 +241,64 @@ class OrganizeRequest(EmbedTrainingData):
         )
         self.frontier.add(starting_node) #add the node to the frontier
         pos = 0 #set the position to the end of the initial state
+        logger.info(f"initial frontier: {self.frontier.frontier}")
 
         final_results = [] #list to store the final results of the search
-        while pos < len(tokens): #main loop that slides through the request
+        while pos < len(tokens) and not self.frontier.invalid(self.max_vision): #main loop that slides through the request
             node = self.frontier.pop() #get the next node from the frontier
-            next_frontier = Frontier(self.beam_width) #create a new frontier
-            patterns = self.frontier.contains_phrase(node, self.phrase_type) #get the patterns that match the node
-            
-            if patterns == []:
-                pos += 1 #if no patterns match, move to the next position
-                if pos >= len(tokens): #if the position is past the end of the request, break the loop
+            is_pattern = self.frontier.contains_phrase(node, self.phrase_type) #verify if the node contains a valid pattern
+
+            if not is_pattern:
+                new_pos = pos + 1 #if no patterns match, move to the next position
+                if new_pos >= len(tokens): #if the position is past the end of the request, break the loop
                     break
 
-                new_state = tokens[pos:pos + min(self.max_vision, len(tokens) - pos)] #get the next n words of the request
+                new_state = tokens[new_pos:new_pos + min(self.max_vision, len(tokens) - new_pos)] #get the next n words of the request
                 new_node = Node(
                     new_state,
                     parent=node,
                     action=None,
                     path_score=node.path_score
                 )
-                next_frontier.add(new_node) #add the new node to the frontier
-            else:   
-                for pattern in patterns:
-                    score = self.score_phrase(pattern, self.phrase_category)
-                    pattern_length = len(pattern)
-                    if pattern_length + pos > len(tokens):
-                        pattern_length = 1
-                    
-                    new_pos = pos + pattern_length
-                    if new_pos >= len(tokens):
-                        new_state = []
-                    else:
-                        new_state = tokens[new_pos: new_pos + min(self.max_vision, len(tokens) - new_pos)]
+                self.frontier.add(new_node) #add the new node to the frontier
+            else:# if a pattern is found, score it, and create a new node that follows after the sequence position
+                score = self.score_phrase(node.state, self.phrase_category)
+                state_length = len(node.state)
+        
+                new_pos = pos + state_length
+                if new_pos >= len(tokens):
+                    break
+                new_state = tokens[new_pos: new_pos + min(self.max_vision, len(tokens) - new_pos)]
+                new_node = Node(
+                    new_state,
+                    parent=node,
+                    action=is_pattern,
+                    path_score=node.path_score + score
+                )
+                self.frontier.add(new_node)
+                final_results.append(new_node)
 
-                    new_node = Node(
-                        new_state,
-                        parent=node,
-                        action=pattern,
-                        path_score=node.path_score + score
-                    )
-                    next_frontier.add(new_node)
-                    final_results.append(new_node)
-
-            next_frontier.prune(self.beam_width)
-            self.frontier = next_frontier
             pos += 1
+            self.frontier.prune(self.beam_width)
         if final_results != []:
             final_results.sort(key=lambda node: node.path_score, reverse=True)
+
             return final_results[:self.beam_width]
         else:
             return []
+        
 
-    
+    def fetch_others(self):
+        doc = self.nlp(self.request) #process request for tagging
+        phrases = {
+            "DATE": [],
+            "TIME": [],
+            "PERSON": [],
+            "ORG": []
+        }
+
+        for ent in doc.ents:
+            if ent.label_ == "DATE" or ent.label_ == "TIME" or ent.label_ == "PERSON" or ent.label_ == "ORG":
+                phrases[ent.label_].append(ent.text)
+        
+        return phrases
